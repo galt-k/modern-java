@@ -94,7 +94,7 @@ public class Generics {
         System.out.println();
     }
 
-    // Generic Stack
+    //6.  Generic Stack
     static class Stack<E> {
         private final Deque<E> deque = new ArrayDeque<>();
 
