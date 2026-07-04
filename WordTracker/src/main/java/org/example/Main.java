@@ -18,10 +18,12 @@ import java.util.Map;
 import java.util.List;
 import static java.nio.file.Files.*;
 
+
+
 public class Main {
 
     private static final String FILE_PATH = "cities.txt";
-    private record Segment(long start, int size){};
+    public record Segment(long start, int size){};
 
     public static void main(String[] args) throws IOException {
         Map<Integer, Integer> frequencyMap = new HashMap<>();
@@ -35,7 +37,12 @@ public class Main {
         // 2. Run the method
         //basic_v1(String.valueOf(path)); //510
         //basic_v2_Channel(path);//307
-        streams_v3(path); // 237ms
+        //streams_v3(path); // 237ms
+        //WordTrackerStrain.futures_v5(path);
+        //WordTrackerStrain.futures_v4(path);
+        WordTrackerStrain.virtualThreads_v6(path);
+
+
 
         // 3. Capture end time
         long endTime = System.nanoTime();
@@ -260,7 +267,7 @@ public class Main {
 
     }
 
-    private static List<Segment> getSegments(Path path){
+    public static List<Segment> getSegments(Path path){
         try(RandomAccessFile file = new RandomAccessFile(String.valueOf(path), "r")){
             long totalFileSize = file.length();
             System.out.println("Size of the file in bytes = " + totalFileSize);
