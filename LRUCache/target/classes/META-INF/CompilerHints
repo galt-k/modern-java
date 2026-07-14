@@ -1,0 +1,14 @@
+dontinline,*.*_all_jmhStub
+dontinline,*.*_avgt_jmhStub
+dontinline,*.*_sample_jmhStub
+dontinline,*.*_ss_jmhStub
+dontinline,*.*_thrpt_jmhStub
+inline,org/example/CacheBenchmark.globalLock_t1
+inline,org/example/CacheBenchmark.globalLock_t16
+inline,org/example/CacheBenchmark.globalLock_t4
+inline,org/example/CacheBenchmark.globalLock_t8
+inline,org/example/CacheBenchmark.segmented_t1
+inline,org/example/CacheBenchmark.segmented_t16
+inline,org/example/CacheBenchmark.segmented_t4
+inline,org/example/CacheBenchmark.segmented_t8
+inline,org/example/CacheBenchmark.setup

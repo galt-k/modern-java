@@ -1,0 +1,8 @@
+JMH S 26 org.example.CacheBenchmark S 62 org.example.jmh_generated.CacheBenchmark_globalLock_t1_jmhTest S 13 globalLock_t1 S 10 Throughput I 1 1 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
+JMH S 26 org.example.CacheBenchmark S 63 org.example.jmh_generated.CacheBenchmark_globalLock_t16_jmhTest S 14 globalLock_t16 S 10 Throughput I 2 16 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
+JMH S 26 org.example.CacheBenchmark S 62 org.example.jmh_generated.CacheBenchmark_globalLock_t4_jmhTest S 13 globalLock_t4 S 10 Throughput I 1 4 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
+JMH S 26 org.example.CacheBenchmark S 62 org.example.jmh_generated.CacheBenchmark_globalLock_t8_jmhTest S 13 globalLock_t8 S 10 Throughput I 1 8 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
+JMH S 26 org.example.CacheBenchmark S 61 org.example.jmh_generated.CacheBenchmark_segmented_t1_jmhTest S 12 segmented_t1 S 10 Throughput I 1 1 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
+JMH S 26 org.example.CacheBenchmark S 62 org.example.jmh_generated.CacheBenchmark_segmented_t16_jmhTest S 13 segmented_t16 S 10 Throughput I 2 16 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
+JMH S 26 org.example.CacheBenchmark S 61 org.example.jmh_generated.CacheBenchmark_segmented_t4_jmhTest S 12 segmented_t4 S 10 Throughput I 1 4 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
+JMH S 26 org.example.CacheBenchmark S 61 org.example.jmh_generated.CacheBenchmark_segmented_t8_jmhTest S 12 segmented_t8 S 10 Throughput I 1 8 A 1 1 1 E I 1 3 T 3 1 s E I 1 5 T 3 1 s E I 1 1 E E E E E E U 7 SECONDS E E 
