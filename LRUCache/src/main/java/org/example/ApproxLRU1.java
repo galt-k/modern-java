@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Random;
+
 class CacheEntry{
     public volatile int value;
     private volatile long lastAccessedTime;//default time
@@ -23,16 +24,19 @@ class CacheEntry{
     }
 }
 
-public class ApproxLRU1 {
+public class ApproxLRU1 implements AutoCloseable {
     //create a ConcurrenHashMap
-    Map<Integer, CacheEntry> mapper = new ConcurrentHashMap<>();
-    int capacity;
-    int evictionSamples;
+    private final Map<Integer, CacheEntry> mapper = new ConcurrentHashMap<>();
+    private final int capacity;
+    private final int evictionSamples;
     private final Random random = new Random();
+    private final Buffer buffer;
 
     public ApproxLRU1(int capacity, int evictionSamples) {
         this.capacity = capacity;
         this.evictionSamples = evictionSamples;
+        this.buffer = new Buffer(this::touchKeyFromBackground);
+        this.buffer.start();
     }
 
     public void put(int key, int value) {
@@ -68,15 +72,24 @@ public class ApproxLRU1 {
     }
 
     public int get(int key) {
-        try {
-            CacheEntry entry = mapper.get(key);
-
-            entry.touch();
-            return entry.value;
-
-        } catch (Exception e){
-            throw new NoSuchElementException();
+        CacheEntry entry = mapper.get(key);
+        if (entry == null) {
+            throw new NoSuchElementException("No such key: " + key);
         }
+        // No direct touch() here anymore — just enqueue the access event
+        // and return immediately. The background Buffer thread applies
+        // the actual timestamp update later, off this read path.
+        buffer.addMessage(key);
+        return entry.value;
+    }
+
+    void touchKeyFromBackground(int key) {
+        CacheEntry entry = mapper.get(key);
+        if (entry != null) {
+            entry.touch();
+        }
+        // if entry is null, the key was evicted before the background
+        // thread got to it — nothing to do, safe to ignore
     }
 
     private synchronized void evict(){
@@ -107,5 +120,10 @@ public class ApproxLRU1 {
 
     public int size(){
         return mapper.size();
+    }
+
+    @Override
+    public void close() throws Exception {
+        buffer.stop();
     }
 }
