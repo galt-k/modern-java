@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,6 +25,9 @@ public class ConcurrentBlockingQueue {
     Condition notFull = tailLock.newCondition();
     Condition notEmpty = headLock.newCondition();
 
+    // Maximum of 10 concurrent producer threads are allowed inside put
+    private final Semaphore producerSemaphore = new Semaphore(10,true);
+
     public ConcurrentBlockingQueue(int capacity) {
         this.size.set(0);
         Node dummy = new Node(-1);
@@ -34,38 +38,46 @@ public class ConcurrentBlockingQueue {
     // create a new node and update the tail pointer
     // used by producers, always a tail operation.
     public void put(int value) throws InterruptedException {
+        // Step 1: Apply thread-level backpressure Before touching the queu locks
+        // if 10 threads are already executing put(), the 11th thread safely blocks right here
+        producerSemaphore.acquire();
         //here add a lock
         int countBeforeInsertion = -1;
-        tailLock.lock();
         try {
-            while (this.size.get() == this.capacity) {
-                //here i want to ensure the thread goes into the blocking state and
-                notFull.await(); // waiting for the ideal condition to occur. The ideal condition is the queue to be notFull.
-            }
+            tailLock.lock();
 
-            Node newNode = new Node(value);
-            countBeforeInsertion = this.size.getAndIncrement();
-
-            // FIXED: Clean branch ensuring we don't double-link a node to itself
-            this.tail.next = newNode;
-            this.tail = newNode;
-
-            if(countBeforeInsertion + 1 < this.capacity) {
-                notFull.signal();
-            }
-
-        } finally {
-            tailLock.unlock();
-        }
-
-        if(countBeforeInsertion == 0) {
-            //wake up the consumer threads
-            headLock.lock();
             try {
-                notEmpty.signal();
+                while (this.size.get() == this.capacity) {
+                    //here i want to ensure the thread goes into the blocking state and
+                    notFull.await(); // waiting for the ideal condition to occur. The ideal condition is the queue to be notFull.
+                }
+
+                Node newNode = new Node(value);
+                countBeforeInsertion = this.size.getAndIncrement();
+
+                // FIXED: Clean branch ensuring we don't double-link a node to itself
+                this.tail.next = newNode;
+                this.tail = newNode;
+
+                if (countBeforeInsertion + 1 < this.capacity) {
+                    notFull.signal();
+                }
+
             } finally {
-                headLock.unlock();
+                tailLock.unlock();
             }
+
+            if (countBeforeInsertion == 0) {
+                //wake up the consumer threads
+                headLock.lock();
+                try {
+                    notEmpty.signal();
+                } finally {
+                    headLock.unlock();
+                }
+            }
+        } finally {
+            producerSemaphore.release();
         }
         return;
     }
@@ -111,5 +123,9 @@ public class ConcurrentBlockingQueue {
 
         return result;
 
+    }
+
+    public int size() {
+        return this.size.get();
     }
 }
