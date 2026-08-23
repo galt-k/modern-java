@@ -1,10 +1,12 @@
+package org.example;
+
 import java.util.concurrent.*;
 
 // Task holds the logic, target time, and the Completable Future handle
 class Task implements Comparable<Task> {
-    private final Runnable runnable;
-    private final long execTimeNanos;
-    final CompletableFuture<> future = new CompletableFuture<>();
+    final Runnable runnable;
+    final long execTimeNanos;
+    final CompletableFuture<Void> future = new CompletableFuture<>();
     public Task(Runnable task, long delayMs){
         this.runnable = task;
         this.execTimeNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(delayMs);    }
@@ -26,7 +28,7 @@ public class ThreadSafeDeferredCallback {
     private boolean isRunning;
 
     public ThreadSafeDeferredCallback(){
-        this.WatcherThread = new Thread(() -> {schedulerLoop()});
+        this.WatcherThread = new Thread(() -> {schedulerLoop();});
         this.WatcherThread.setDaemon(true);
         this.WatcherThread.start();
         this.isRunning = true;
@@ -44,9 +46,10 @@ public class ThreadSafeDeferredCallback {
 
     private void schedulerLoop(){
         while (isRunning) {
+            try {
             //take the earlist task (blocks if queue is empty)
             Task task = queue.peek();
-            if (task != null) {
+            if (task == null) {
                 Thread.sleep(10);
                 continue;
             }
@@ -59,9 +62,9 @@ public class ThreadSafeDeferredCallback {
 
             long now = System.nanoTime();
             long delaynanos = task.execTimeNanos - now;
-            if(delaynanos <= 0){
+            if(delaynanos <= 0) {
                 Task readyTask = queue.poll();
-                if(readyTask != null && !readyTask.future.isCancelled()){
+                if (readyTask != null && !readyTask.future.isCancelled()) {
                     //offload execution to virtual threads
                     virtualExecutor.submit(() -> {
                         try {
@@ -71,7 +74,8 @@ public class ThreadSafeDeferredCallback {
                             readyTask.future.completeExceptionally(t);
                         }
                     });
-                } else {
+                }
+            } else {
                     // TIme not reached yet
                     long sleepMs = TimeUnit.NANOSECONDS.toMillis(delaynanos);
                     if (sleepMs > 0) {
